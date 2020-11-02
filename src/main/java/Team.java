@@ -1,30 +1,33 @@
+import java.util.LinkedList;
+import java.util.stream.Collectors;
+
 public class Team implements Comparable<Team> {
-    private String name;
-    private int points;
-    private int goalsShot;
-    private int goalsReceived;
-    private int wins;
-    private int defeats;
-    private int draws;
+    private final String name;
+    private LinkedList<Game> gamesOfThisTeam = new LinkedList<Game>();
 
     public Team(String name) {
         this.name = name;
     }
 
-    public void addGame(Game game) {
-        if (name == game.getHomeTeam().getName()) {
-            points += game.getPointsForHomeTeam();
-        } else if (name == game.getGuestTeam().getName()) {
-            points += game.getPointsForGuestTeam();
-        }
+    public LinkedList<Game> getGamesOfThisTeam() {
+        return gamesOfThisTeam;
     }
 
     public int getPoints() {
-        return points;
+        int pointsAsHome = gamesOfThisTeam.stream()
+                .filter(game -> game.getHomeTeam() == this)
+                .mapToInt(game -> game.getPointsForHomeTeam())
+                .sum();
+        int pointsAsGuest = gamesOfThisTeam.stream()
+                .filter(game -> game.getGuestTeam() == this)
+                .mapToInt(game -> game.getPointsForGuestTeam())
+                .sum();
+
+        return pointsAsGuest + pointsAsHome;
     }
 
     public int getGoalDifference() {
-        return goalsShot - goalsReceived;
+        return getGoalsShot() - getGoalsReceived();
     }
 
     public String getName() {
@@ -32,34 +35,71 @@ public class Team implements Comparable<Team> {
     }
 
     public int getGoalsShot() {
-        return goalsShot;
+        int goalsAsHome = gamesOfThisTeam.stream()
+                .filter(game -> game.getHomeTeam() == this)
+                .mapToInt(game -> game.getGoalsForHomeTeam())
+                .sum();
+        int goalsAsGuest = gamesOfThisTeam.stream()
+                .filter(game -> game.getGuestTeam() == this)
+                .mapToInt(game -> game.getGoalsForGuestTeam())
+                .sum();
+        return goalsAsHome + goalsAsGuest;
     }
 
     public int getGoalsReceived() {
-        return goalsReceived;
+        int goalsReceivedAsHome = gamesOfThisTeam.stream()
+                .filter(game -> game.getHomeTeam() == this)
+                .mapToInt(game -> game.getGoalsForGuestTeam())
+                .sum();
+        int goalsReceivedAsGuest = gamesOfThisTeam.stream()
+                .filter(game -> game.getGuestTeam() == this)
+                .mapToInt(game -> game.getGoalsForHomeTeam())
+                .sum();
+        return goalsReceivedAsGuest + goalsReceivedAsHome;
     }
 
     public int getWins() {
-        return wins;
+        int winsAsHome = (int) gamesOfThisTeam.stream()
+                .filter(game -> game.getHomeTeam() == this)
+                .filter(game -> game.getGoalsForHomeTeam() > game.getGoalsForGuestTeam())
+                .count();
+        int winsAsGuest = (int) gamesOfThisTeam.stream()
+                .filter(game -> game.getGuestTeam() == this)
+                .filter(game -> game.getGoalsForGuestTeam() > game.getGoalsForHomeTeam())
+                .count();
+
+        return winsAsGuest + winsAsHome;
     }
 
     public int getDefeats() {
-        return defeats;
+        int defeatsAsHome = (int) gamesOfThisTeam.stream()
+                .filter(game -> game.getHomeTeam() == this)
+                .filter(game -> game.getGoalsForHomeTeam() < game.getGoalsForGuestTeam())
+                .count();
+        int defeatsAsGuest = (int) gamesOfThisTeam.stream()
+                .filter(game -> game.getGuestTeam() == this)
+                .filter(game -> game.getGoalsForGuestTeam() < game.getGoalsForHomeTeam())
+                .count();
+
+        return defeatsAsHome + defeatsAsGuest;
     }
 
     public int getDraws() {
-        return draws;
+        int drawsAsHome = (int) gamesOfThisTeam.stream()
+                .filter(game -> game.getHomeTeam() == this)
+                .filter(game -> game.getGoalsForHomeTeam() == game.getGoalsForGuestTeam())
+                .count();
+        int drawsAsGuest = (int) gamesOfThisTeam.stream()
+                .filter(game -> game.getGuestTeam() == this)
+                .filter(game -> game.getGoalsForGuestTeam() == game.getGoalsForHomeTeam())
+                .count();
+
+        return drawsAsHome + drawsAsGuest;
     }
 
     @Override
     public int compareTo(Team team) {
-        if (this.getPoints() < team.getPoints()) {
-            return -1;
-        } else if (this.getPoints() > team.getPoints()) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return Integer.compare(this.getPoints(), team.getPoints());
     }
 
     @Override

@@ -1,8 +1,8 @@
 public class Game {
-    private Team homeTeam;
-    private Team guestTeam;
-    private int goalsForHomeTeam;
-    private int goalsForGuestTeam;
+    private final Team homeTeam;
+    private final Team guestTeam;
+    private final int goalsForHomeTeam;
+    private final int goalsForGuestTeam;
 
     public Game (Team homeTeam, Team guestTeam, int goalsForHomeTeam, int
                  goalsForGuestTeam) {
